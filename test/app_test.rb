@@ -118,6 +118,16 @@ class AppTest < Dashing::Test
     end
   end
 
+  def test_get_dashboard_in_subdir
+    with_generated_project do
+      get '/subdir/sample'
+      assert_equal 200, last_response.status
+      assert_includes last_response.body, 'class="gridster"'
+      assert_includes last_response.body, "DOCTYPE"
+      assert_includes last_response.body, '<title>Subdirectory dashboard</title>'
+    end
+  end
+
   def test_page_title_set_correctly
     with_generated_project do
       get '/sampletv'

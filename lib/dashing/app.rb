@@ -75,16 +75,6 @@ get '/events', provides: 'text/event-stream' do
   end
 end
 
-get '/:dashboard' do
-  protected!
-  tilt_html_engines.each do |suffix, _|
-    file = File.join(settings.views, "#{params[:dashboard]}.#{suffix}")
-    return render(suffix.to_sym, params[:dashboard].to_sym) if File.exist? file
-  end
-
-  halt 404
-end
-
 post '/dashboards/:id' do
   request.body.rewind
   body = JSON.parse(request.body.read)
@@ -135,6 +125,17 @@ get '/views/:widget?.html' do
     return engines.first.new(file).render if File.exist? file
   end
   "Drats! Unable to find a widget file named: #{params[:widget]} to render."
+end
+
+get '/*' do
+  dashboard = File.join(params[:splat])
+  protected!
+  tilt_html_engines.each do |suffix, _|
+    file = File.join(settings.views, "#{dashboard}.#{suffix}")
+    return render(suffix.to_sym, dashboard.to_sym) if File.exist? file
+  end
+
+  halt 404
 end
 
 Thin::Server.class_eval do
